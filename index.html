@@ -1,0 +1,182 @@
+<html>
+<head>
+    <title>NinjaMan</title>
+    <style type='text/css'>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+        .row {
+            line-height: 0;
+        }
+        .wall {
+            background-color: blue;
+            height: 40px;
+            width: 40px;
+            display: inline-block;
+        }
+        .sushi {
+            background-color: black;
+            height: 40px;
+            width: 40px;
+            display: inline-block;
+            background-image: url('./img/sushi.png');
+            background-size: contain;
+        }
+        .onigiri {
+            background-color: black;
+            height: 40px;
+            width: 40px;
+            display: inline-block;
+            background-image: url('./img/onigiri.png');
+            background-size: contain;
+        }
+        .blank {
+            background-color: black;
+            height: 40px;
+            width: 40px;
+            display: inline-block;
+        }
+        #ninjaman {
+            background-color: black;
+            height: 40px;
+            width: 40px;
+            display: inline-block;
+            background-image: url('./img/ninja.gif');
+            background-size: contain;
+            position: absolute;
+        }
+        #ghost {
+            height: 40px;
+            width: 40px;
+            display: inline-block;
+            background-image: url('./img/pumpky.gif');
+            background-size: contain;
+            position: absolute;
+        }
+        #score {
+            position: absolute;
+            top: 340px;
+            left: 100px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id='world'></div>
+    <div id='ninjaman'></div>
+    <div id='ghost'></div>
+    <div id='score'></div>
+    <script type='text/javascript'>
+        function randomNum() {
+            return Math.floor((Math.random()* 4))
+        }
+
+        var world = [] 
+        for (var r = 0; r < 8; r++) {
+            var arr = []
+            for (var c = 0; c < 8; c ++) {
+                arr.push(randomNum())
+            }
+            world.push(arr)
+        }
+
+        var worldDict = {
+            0: 'blank',
+            1: 'wall',
+            2: 'sushi',
+            3: 'onigiri'
+        }
+        var ninjaman = {r: 1, c: 1}
+        var ghost = {r: 7, c: 7}
+        var score = 0
+
+        function drawWorld() {
+            var output = '';
+            for (var r = 0; r < world.length; r++) {
+                output += "<div class='row'>"
+                for (var c = 0; c < world[r].length; c++) {
+                    output += "<div class='" + worldDict[world[r][c]] + "'></div>"
+                }
+                output += "</div>"
+            }
+            document.getElementById('world').innerHTML = output;
+            drawNinjaman()
+            drawGhost()
+            // gameLoop()
+        }
+
+        drawWorld();
+
+        function drawNinjaman() {
+            document.getElementById('ninjaman').style.left = ninjaman.c * 40 + 'px'
+            document.getElementById('ninjaman').style.top = ninjaman.r * 40 + 'px'
+        }
+
+        function drawGhost() {
+            document.getElementById('ghost').style.left = ghost.c * 40 + 'px'
+            document.getElementById('ghost').style.top = ghost.r * 40 + 'px'
+        }
+
+        function keepScore() {
+            if (world[ninjaman.r][ninjaman.c] == 2) {
+                score += 10
+            } else if (world[ninjaman.r][ninjaman.c] == 3) {
+                score += 5
+            }
+            document.getElementById('score').innerHTML = "<h3>Score: " + score + " points </h3>"
+        }
+        keepScore()
+
+        function moveGhostRow() {
+            if (ghost.r > ninjaman.r) {
+                ghost.r -= 1
+            } else if (ghost.r < ninjaman.r) {
+                ghost.r += 1
+            } 
+            drawGhost()
+        }
+
+        function moveGhostColumn() {
+            if (ghost.c > ninjaman.r) {
+                ghost.c -= 1
+            } else if (ghost.c < ninjaman.c) {
+                ghost.c += 1
+            } 
+            drawGhost()
+        }
+
+        function gameLoop() {
+            console.log(ghost)
+            if (ghost.c != ninjaman.c || ghost.r != ninjaman.r) {
+                moveGhostRow()
+                moveGhostColumn()
+                setTimeout(gameLoop, 1000)
+            }      
+        }
+
+        document.onkeydown = function (e) {
+            console.log(e.code, e.keyCode)
+            let { r, c } = ninjaman
+            if (e.keyCode == 37 && (ninjaman.c-1 >= 0) && world[r][c-1] != 1) { // LEFT
+                ninjaman.c--
+            } else if (e.keyCode == 39 && (ninjaman.c+1 < 8) && (world[r][c+1] != 1)) { // RIGHT
+                ninjaman.c++
+            } else if (e.keyCode == 38 && (ninjaman.r-1 >= 0) && (world[r-1][c] != 1)) { // UP
+                ninjaman.r--
+            } else if (e.keyCode == 40 && (ninjaman.r+1 < 8)&& (world[r+1][c] != 1)) { // DOWN
+                ninjaman.r++
+            }
+
+            console.log('c', ninjaman.c * 40)
+            console.log('r', ninjaman.r * 40)
+
+            world[r][c] = 0
+            drawNinjaman()
+            drawWorld()
+            keepScore()
+        }
+    // hacker challenges - create ghosts that chase ninjaman
+    </script>
+</body>
+</html>
